@@ -1,11 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace CSharpObjectIntro.Classes.BankAccount
 {
+    public class AccountTransaction
+    {
+        public DateOnly Date { get; private set; }
+        public decimal Amount { get; private set; }
+        public string Category { get; private set; }
+        public string Counterparty { get; private set; }
+        public string TransactionType { get; private set; }
+        public string Description { get; private set; }
+        public AccountTransaction(DateOnly date, decimal amount, string category, string counterparty, string transactionType, string description = "N/A")
+        {
+            Date = date;
+            Amount = amount;
+            Category = category;
+            Counterparty = counterparty;
+            TransactionType = transactionType;
+            Description = description;
+        }
+    }
     public class BankAccount
     {
         // As you complete each task make sure you test your code carefully
@@ -15,6 +35,87 @@ namespace CSharpObjectIntro.Classes.BankAccount
         // The bank account should have a balance property        
         // It should have a constructor that sets the initial balance (default zero) and the opening date (default today)
         // It should have methods to deposit and withdraw/make payments from the account. 
+        
+        public decimal Balance { get; private set; }
+        public DateOnly OpeningDate { get; private set; }
+        public decimal Limit { get; private set; }
+        public List<AccountTransaction> Transactions { get; private set; }
+        public BankAccount(DateOnly openingDate,int balance = 0)
+        {
+            Balance = balance;
+            OpeningDate = openingDate;
+            Limit = -1;
+            Transactions = new List<AccountTransaction>();
+        }
+        
+        public void SetLimit(int amount)
+        {
+            Limit = amount;
+            //Console.WriteLine($"Overdraft limit set to: {Limit}");
+        }
+
+        public void withdraw(DateOnly date, decimal amount, string category, string counterparty, string transactionType, string description = "N/A")
+        {   
+            if (Limit == -1 || amount <= Limit)
+            {
+                Balance = Balance - amount;
+                AccountTransaction Transaction = new AccountTransaction(date,-amount,category,counterparty,transactionType,description);
+                Transactions.Add(Transaction);
+                Console.WriteLine($"Your Current Balance is {Balance}");
+            }
+            else
+            {
+                Console.WriteLine("Transfer Denied: Overdraft Limit Exceeded");
+            }
+        }
+
+        public void deposit(DateOnly date, decimal amount, string category, string counterparty, string transactionType, string description = "N/A")
+        {
+            Balance = Balance+amount;
+            AccountTransaction Transaction = new AccountTransaction(date,amount,category,counterparty,transactionType,description);
+            Transactions.Add(Transaction);
+            Console.WriteLine($"Your Current Balance iss {Balance}");
+        }
+
+        public string CheckPreviousBalance(DateOnly date)
+        {
+            decimal Temp_Balance = Balance;
+            foreach (AccountTransaction transaction in Transactions)
+            {   
+                if (transaction.Date > date) 
+                {
+                    Temp_Balance = Temp_Balance - transaction.Amount;
+                }
+            }
+            return $"Your balance on {date} is: {Temp_Balance}";
+        }
+
+        public string CheckCategories(string Category)
+        {
+            decimal counter = 0;
+            foreach (AccountTransaction transaction in Transactions)
+            {
+                if (transaction.Category == Category)
+                {
+                    counter = counter - transaction.Amount;
+                }
+            }
+            return $"The total amount of money you've spent on {Category} is: {counter}";
+        }
+
+        public string CheckMoneySpentInAGivenPeriod(DateOnly StartingDate, DateOnly EndingDate)
+        {
+            decimal counter = 0;
+            foreach (AccountTransaction transaction in Transactions)
+            {   
+                if (StartingDate<=transaction.Date && transaction.Date <= EndingDate && transaction.Amount<0)
+                {
+                    counter = counter - transaction.Amount;
+                }
+            }
+            return $"The total amount of money you've spent from {StartingDate} to {EndingDate} is: {counter}";
+        }
+
 
         // Task Two
         // Give the option to set an overdraft limit

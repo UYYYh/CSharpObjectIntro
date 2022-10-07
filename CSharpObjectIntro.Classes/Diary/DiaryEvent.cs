@@ -9,7 +9,7 @@ namespace CSharpObjectIntro.Classes.Diary
     public class DiaryEvent
     {
         // Fields 
-        private TimeOnly _lunchTime = new(12, 0);
+        public TimeOnly _lunchTime = new(12, 0);
 
         // Properties
         public DateOnly Date { get; private set; }

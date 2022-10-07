@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,6 +32,19 @@ namespace CSharpObjectIntro.Classes.Diary
         public int CheckDiary(DateOnly date)
         {
             return diaryEvents.Count(diaryEvent => diaryEvent.Date == date);
+        }
+
+        public int CheckDiaryForMorningEvents(DateOnly date)
+        {
+            int Output = 0;
+            foreach (var Event in diaryEvents)
+            {
+                if (Event.IsMorning)
+                {
+                    Output++;
+                }
+            }
+            return Output;
         }
 
         // Add a new method called check morning events
